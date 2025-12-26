@@ -1,24 +1,19 @@
 :root {
-    /* --- 茶室色彩系統 --- */
-    --tea-bg-paper: #f4ede4;    /* 米黃宣紙 */
-    --tea-wood-dark: #8d6e53;   /* 深色老木 */
-    --tea-wood-light: #dcb378;  /* 棋盤榧木色 */
-    --tea-matcha: #a7b38d;      /* 抹茶綠 */
-    --tea-clay: #c77f67;        /* 陶土紅 (強調色) */
-    --tea-ink: #4a3b2b;         /* 墨褐色文字 */
-    
+    --tea-bg-paper: #f4ede4;
+    --tea-wood-dark: #8d6e53;
+    --tea-wood-light: #dcb378;
+    --tea-matcha: #a7b38d;
+    --tea-clay: #c77f67;
+    --tea-ink: #4a3b2b;
     --shadow-warm: 0 4px 8px rgba(141, 110, 83, 0.3);
     --shadow-inset: inset 0 2px 5px rgba(0,0,0,0.2);
-    
-    /* 宣紙紋理 SVG */
     --paper-texture: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.6' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.1' fill='%23d4c5a3'/%3E%3C/svg%3E");
 }
 
 * {
     box-sizing: border-box; margin: 0; padding: 0;
-    font-family: 'Noto Serif TC', serif; /* 使用襯線字體 */
-    user-select: none;
-    color: var(--tea-ink);
+    font-family: 'Noto Serif TC', serif;
+    user-select: none; color: var(--tea-ink);
 }
 
 body {
@@ -27,41 +22,29 @@ body {
     display: flex; justify-content: center; align-items: center;
 }
 
-/* 背景紋理層 */
 .bg-texture {
     position: fixed; inset: 0; z-index: -1;
     background-image: var(--paper-texture);
-    /* 疊加一個溫暖的徑向漸層光暈 */
     background: radial-gradient(circle at center, rgba(255,255,255,0.1) 0%, rgba(141, 110, 83, 0.2) 100%), var(--paper-texture);
 }
 
-/* --- 通用茶室面板樣式 --- */
+/* 茶室面板 */
 .tea-panel {
-    background: var(--tea-bg-paper);
-    background-image: var(--paper-texture);
+    background: var(--tea-bg-paper); background-image: var(--paper-texture);
     border: 8px solid transparent;
-    /* 模擬木框鑲嵌宣紙的效果 */
     border-image: url("data:image/svg+xml,%3Csvg width='30' height='30' viewBox='0 0 30 30' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 0h30v30H0z' fill='%238d6e53'/%3E%3Cpath d='M2 2h26v26H2z' fill='%23a78b73'/%3E%3C/svg%3E") 8 stretch;
-    box-shadow: var(--shadow-warm);
-    padding: 2rem 3rem;
-    text-align: center;
-    position: relative;
+    box-shadow: var(--shadow-warm); padding: 2rem 3rem; text-align: center; position: relative;
 }
-
-/* 面板頂部裝飾 (模擬掛軸) */
 .panel-deco-top {
     position: absolute; top: -15px; left: 50%; transform: translateX(-50%);
     width: 60%; height: 10px; background: var(--tea-wood-dark);
     border-radius: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.3);
 }
 
-/* --- 模態框 --- */
 .modal-overlay {
     position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(74, 59, 43, 0.6); /* 深棕色遮罩 */
-    backdrop-filter: blur(3px);
-    z-index: 100; display: flex; justify-content: center; align-items: center;
-    transition: opacity 0.5s ease; /* 增加淡出過渡 */
+    background: rgba(74, 59, 43, 0.6); backdrop-filter: blur(3px);
+    z-index: 100; display: flex; justify-content: center; align-items: center; transition: opacity 0.5s ease;
 }
 
 .tea-title { font-size: 2.5rem; font-weight: 700; margin-bottom: 0.5rem; color: var(--tea-wood-dark); }
@@ -71,209 +54,119 @@ body {
 .mode-select-tea { display: flex; flex-direction: column; gap: 1rem; align-items: center; }
 .btn-group-tea { display: flex; gap: 1rem; width: 100%; }
 
-/* 茶系按鈕 */
 .btn-tea, .btn-bamboo {
     padding: 0.8rem 1.5rem; border-radius: 50px; cursor: pointer;
     font-size: 1rem; font-weight: bold; transition: all 0.2s;
     border: 2px solid var(--tea-wood-dark);
     display: flex; justify-content: center; align-items: center; gap: 8px;
-    box-shadow: var(--shadow-warm);
-    background: var(--tea-bg-paper); color: var(--tea-ink);
+    box-shadow: var(--shadow-warm); background: var(--tea-bg-paper); color: var(--tea-ink);
 }
 .btn-tea-lg { padding: 1rem 3rem; font-size: 1.2rem; background: var(--tea-matcha); color: white; border: none; }
 .btn-tea-clay { background: var(--tea-clay); color: white; border: none; flex: 1; }
-
-.btn-tea:hover, .btn-bamboo:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 12px rgba(141, 110, 83, 0.4);
-    filter: brightness(1.05);
-}
+.btn-tea:hover, .btn-bamboo:hover { transform: translateY(-2px); box-shadow: 0 6px 12px rgba(141, 110, 83, 0.4); filter: brightness(1.05); }
 
 .tea-divider { display: flex; align-items: center; color: var(--tea-matcha); font-size: 0.9rem; margin: 0.8rem 0; width: 100%; }
 .tea-divider::before, .tea-divider::after { content: ''; flex: 1; height: 1px; background: var(--tea-matcha); opacity: 0.5; }
 .tea-divider span { padding: 0 15px; }
 
-/* 結算樣式 */
 .score-box-tea {
-    background: rgba(167, 179, 141, 0.2); /* 淡抹茶綠背景 */
-    padding: 1.5rem; border-radius: 12px; margin-bottom: 1.5rem;
-    border: 1px dashed var(--tea-wood-dark);
-    text-align: left; line-height: 1.8;
+    background: rgba(167, 179, 141, 0.2); padding: 1.5rem; border-radius: 12px; margin-bottom: 1.5rem;
+    border: 1px dashed var(--tea-wood-dark); text-align: left; line-height: 1.8;
 }
 .winner-text-tea { font-size: 2rem; color: var(--tea-clay); margin-bottom: 2rem; font-weight: bold; }
 
-/* --- 遊戲主佈局 (茶席) --- */
-.game-layout-tea {
-    display: flex; gap: 2rem; padding: 2rem;
-    width: 100%; max-width: 1200px; height: 90vh;
-    position: relative;
-}
-
-/* 左側：棋盤與竹蓆 */
-.board-section-tea {
-    flex: 2; display: flex; justify-content: center; align-items: center;
-    position: relative;
-}
+.game-layout-tea { display: flex; gap: 2rem; padding: 2rem; width: 100%; max-width: 1200px; height: 90vh; position: relative; }
+.board-section-tea { flex: 2; display: flex; justify-content: center; align-items: center; position: relative; }
 
 .bamboo-mat {
-    padding: 20px;
-    /* 模擬竹編紋理背景 */
-    background-color: #eaddca;
+    padding: 20px; background-color: #eaddca;
     background-image: repeating-linear-gradient(90deg, transparent 0, transparent 4px, rgba(141, 110, 83, 0.1) 4px, rgba(141, 110, 83, 0.1) 5px);
-    border-radius: 8px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-    border: 4px solid #cbbba0;
+    border-radius: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); border: 4px solid #cbbba0;
 }
-
 .wood-board-frame {
-    position: relative;
-    border-radius: 4px;
-    /* 模擬厚重的榧木棋盤側面 */
-    background: var(--tea-wood-light);
-    box-shadow: 
-        inset 0 0 0 2px #c49e68, /* 內邊框 */
-        0 5px 15px rgba(0,0,0,0.3), /* 底部陰影 */
-        0 15px 25px -5px rgba(141, 110, 83, 0.5); /* 更深的投影 */
-    padding: 8px;
+    position: relative; border-radius: 4px; background: var(--tea-wood-light);
+    box-shadow: inset 0 0 0 2px #c49e68, 0 5px 15px rgba(0,0,0,0.3), 0 15px 25px -5px rgba(141, 110, 83, 0.5); padding: 8px;
 }
-
 canvas {
     display: block; border-radius: 2px; cursor: pointer;
-    /* 棋盤表面紋理 (木紋 + 宣紙感) */
     background-color: var(--tea-wood-light);
     background-image: var(--paper-texture), linear-gradient(to right, rgba(0,0,0,0.03) 1px, transparent 1px), linear-gradient(to bottom, rgba(0,0,0,0.03) 1px, transparent 1px);
     box-shadow: inset 0 2px 5px rgba(0,0,0,0.15);
 }
 
-/* --- 右側：木製茶盤側邊欄 --- */
+/* 側邊欄 */
 .sidebar-tea {
-    flex: 1; max-width: 350px; padding: 2rem;
-    display: flex; flex-direction: column; gap: 1.5rem;
-    background: var(--tea-wood-dark); /* 深木色背景 */
-    background-image: linear-gradient(to bottom, rgba(255,255,255,0.05), rgba(0,0,0,0.1));
-    border-radius: 16px;
-    border: 4px solid #6f5641;
-    box-shadow: 0 10px 20px rgba(0,0,0,0.3), inset 0 2px 5px rgba(255,255,255,0.1);
-    color: #f4ede4; /* 側邊欄文字改為淺色 */
+    flex: 1; max-width: 350px; padding: 2rem; display: flex; flex-direction: column; gap: 1.5rem;
+    background: var(--tea-wood-dark); background-image: linear-gradient(to bottom, rgba(255,255,255,0.05), rgba(0,0,0,0.1));
+    border-radius: 16px; border: 4px solid #6f5641; box-shadow: 0 10px 20px rgba(0,0,0,0.3), inset 0 2px 5px rgba(255,255,255,0.1); color: #f4ede4;
 }
-
-.sidebar-header-tea { text-align: center; border-bottom: 2px dashed rgba(244, 237, 228, 0.3); padding-bottom: 1rem;}
+.sidebar-header-tea { text-align: center; border-bottom: 2px dashed rgba(244, 237, 228, 0.3); padding-bottom: 1rem; }
 .sidebar-header-tea h3 { color: #f4ede4; letter-spacing: 2px; margin-bottom: 5px; }
-.status-tea {
-    display: inline-block; padding: 5px 15px;
-    background: rgba(167, 179, 141, 0.3); border-radius: 20px;
-    font-weight: bold; color: var(--tea-matcha); font-size: 1.1rem;
-    border: 1px solid var(--tea-matcha);
-}
+.status-tea { display: inline-block; padding: 5px 15px; background: rgba(167, 179, 141, 0.3); border-radius: 20px; font-weight: bold; color: var(--tea-matcha); font-size: 1.1rem; border: 1px solid var(--tea-matcha); }
 
 .players-tea-tray {
-    /* 內凹的茶盤區域 */
     background: rgba(0,0,0,0.2); border-radius: 12px; padding: 1rem;
-    display: flex; flex-direction: column; gap: 1rem;
-    box-shadow: var(--shadow-inset);
+    display: flex; flex-direction: column; gap: 1rem; box-shadow: var(--shadow-inset);
 }
-
 .player-coaster {
     display: flex; align-items: center; gap: 1rem; padding: 0.8rem;
     border-radius: 12px; transition: all 0.3s;
-    background: rgba(244, 237, 228, 0.1);
-    border: 1px solid transparent;
+    background: rgba(244, 237, 228, 0.1); border: 1px solid transparent;
 }
-.player-coaster.active {
-    background: rgba(244, 237, 228, 0.9); /* 激活時變亮 */
-    border-color: var(--tea-matcha);
-    box-shadow: var(--shadow-warm);
-    transform: scale(1.02);
-}
-.player-coaster.active .label-tea, .player-coaster.active .score-tea { color: var(--tea-ink); } /* 激活時文字變深 */
-.label-tea, .score-tea { color: #f4ede4; transition: color 0.3s; }
+.player-coaster.active { background: rgba(244, 237, 228, 0.9); border-color: var(--tea-matcha); box-shadow: var(--shadow-warm); transform: scale(1.02); }
+.player-coaster.active .label-tea, .player-coaster.active .stat-label, .player-coaster.active .stat-num { color: var(--tea-ink); }
+.label-tea { font-size: 0.9rem; font-weight: bold; color: #f4ede4; margin-bottom: 5px; display: block; }
 
+/* 統計數據區塊 (新功能樣式) */
+.stats-tea {
+    display: flex; gap: 15px;
+}
+.stat-row {
+    display: flex; flex-direction: column;
+}
+.stat-label { font-size: 0.75rem; color: #ccc; }
+.stat-num { font-size: 1.2rem; color: #f4ede4; font-weight: bold; }
+.sub .stat-num, .sub span { font-size: 1rem; opacity: 0.9; }
 
 .stone-tea { width: 36px; height: 36px; border-radius: 50%; box-shadow: 1px 2px 4px rgba(0,0,0,0.4); border: 2px solid rgba(255,255,255,0.1); }
-/* 調整棋子圖標的質感，像陶珠或玉石 */
 .black-stone { background: radial-gradient(circle at 30% 30%, #5a5a5a, #1a1a1a); }
 .white-stone { background: radial-gradient(circle at 30% 30%, #fff, #e0e0d0); }
 
-.info-tea { display: flex; flex-direction: column; width: 100%; }
-.label-tea { font-size: 0.9rem; font-weight: bold; }
-.score-tea { font-size: 0.8rem; display: flex; justify-content: space-between; opacity: 0.9; }
-
 .tea-vs-divider { height: 2px; background: rgba(244, 237, 228, 0.2); margin: 0 1rem; border-radius: 2px; }
-
 .controls-tea { margin-top: auto; display: flex; flex-direction: column; gap: 1rem; }
-/* 竹片風格按鈕 */
+
 .btn-bamboo {
-    background: linear-gradient(to bottom, #d8c69f, #bfa87c); /* 竹子色漸層 */
-    border: none; color: var(--tea-ink);
-    box-shadow: 0 4px 0 #8c7a5b, 0 6px 10px rgba(0,0,0,0.2); /* 厚度感陰影 */
-    border-radius: 8px; /* 較方的圓角，像竹牌 */
-    text-shadow: 0 1px 0 rgba(255,255,255,0.3);
+    background: linear-gradient(to bottom, #d8c69f, #bfa87c); border: none; color: var(--tea-ink);
+    box-shadow: 0 4px 0 #8c7a5b, 0 6px 10px rgba(0,0,0,0.2); border-radius: 8px; text-shadow: 0 1px 0 rgba(255,255,255,0.3);
 }
 .btn-bamboo:hover { transform: translateY(-2px); box-shadow: 0 6px 0 #8c7a5b, 0 8px 15px rgba(0,0,0,0.3); }
 .btn-bamboo:active { transform: translateY(2px); box-shadow: 0 2px 0 #8c7a5b, 0 3px 5px rgba(0,0,0,0.3); }
-
-.btn-reset-tea {
-    background: linear-gradient(to bottom, #c77f67, #a66550); /* 陶土紅竹片 */
-    color: white; text-shadow: none;
-    box-shadow: 0 4px 0 #7a4a3a, 0 6px 10px rgba(0,0,0,0.2);
-}
+.btn-reset-tea { background: linear-gradient(to bottom, #c77f67, #a66550); color: white; text-shadow: none; box-shadow: 0 4px 0 #7a4a3a, 0 6px 10px rgba(0,0,0,0.2); }
 .btn-reset-tea:hover { box-shadow: 0 6px 0 #7a4a3a, 0 8px 15px rgba(0,0,0,0.3); }
 .btn-reset-tea:active { box-shadow: 0 2px 0 #7a4a3a, 0 3px 5px rgba(0,0,0,0.3); }
 
-
-/* --- 叫吃陶印警告 --- */
 .atari-seal {
     position: absolute; top: 5%; left: 50%; transform: translateX(-50%) rotate(-2deg);
     background: var(--tea-clay); color: #f4ede4; padding: 12px 30px;
-    font-weight: bold; font-size: 1.2rem;
-    /* 模擬不規則的陶土印章形狀 */
-    border-radius: 25px 5px 20px 10px;
-    border: 3px solid #a66550;
-    box-shadow: 5px 5px 15px rgba(0,0,0,0.3);
-    opacity: 0; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    z-index: 50; pointer-events: none;
+    font-weight: bold; font-size: 1.2rem; border-radius: 25px 5px 20px 10px; border: 3px solid #a66550;
+    box-shadow: 5px 5px 15px rgba(0,0,0,0.3); opacity: 0; transition: all 0.4s; z-index: 50; pointer-events: none;
 }
 .atari-seal.show { opacity: 1; transform: translateX(-50%) rotate(0deg) scale(1); }
 
-/* --- AI 茶杯蒸氣動畫 --- */
 .ai-steam-overlay {
-    position: absolute; inset: 0;
-    background: rgba(220, 179, 120, 0.3); /* 淡淡的茶色遮罩 */
-    backdrop-filter: blur(2px);
-    display: flex; flex-direction: column; justify-content: center; align-items: center;
-    border-radius: 2px;
+    position: absolute; inset: 0; background: rgba(220, 179, 120, 0.3); backdrop-filter: blur(2px);
+    display: flex; flex-direction: column; justify-content: center; align-items: center; border-radius: 2px;
 }
-
 .tea-cup-loader { position: relative; width: 60px; height: 60px; margin-bottom: 15px; }
-/* 茶杯本體 */
-.cup-body {
-    position: absolute; bottom: 0; left: 10px; width: 40px; height: 30px;
-    background: var(--tea-clay); border-radius: 0 0 20px 20px;
-    border: 2px solid #a66550;
-    box-shadow: inset -3px -3px 5px rgba(0,0,0,0.2);
-}
-.cup-body::after { /* 杯把 */
-    content: ''; position: absolute; top: 5px; right: -10px; width: 12px; height: 15px;
-    border: 3px solid var(--tea-clay); border-left: none; border-radius: 0 10px 10px 0;
-}
-/* 蒸氣 */
-.steam {
-    position: absolute; bottom: 35px; width: 8px; height: 8px;
-    background: var(--steam-white); border-radius: 50%;
-    filter: blur(2px); opacity: 0;
-}
+.cup-body { position: absolute; bottom: 0; left: 10px; width: 40px; height: 30px; background: var(--tea-clay); border-radius: 0 0 20px 20px; border: 2px solid #a66550; box-shadow: inset -3px -3px 5px rgba(0,0,0,0.2); }
+.cup-body::after { content: ''; position: absolute; top: 5px; right: -10px; width: 12px; height: 15px; border: 3px solid var(--tea-clay); border-left: none; border-radius: 0 10px 10px 0; }
+.steam { position: absolute; bottom: 35px; width: 8px; height: 8px; background: white; border-radius: 50%; filter: blur(2px); opacity: 0; }
 .s1 { left: 15px; animation: rise 2s infinite 0s; }
 .s2 { left: 25px; animation: rise 2s infinite 0.4s; }
 .s3 { left: 35px; animation: rise 2s infinite 0.8s; }
-
-@keyframes rise {
-    0% { transform: translateY(0) scale(1); opacity: 0; }
-    20% { opacity: 0.8; }
-    100% { transform: translateY(-40px) scale(2); opacity: 0; }
-}
+@keyframes rise { 0% { transform: translateY(0) scale(1); opacity: 0; } 20% { opacity: 0.8; } 100% { transform: translateY(-40px) scale(2); opacity: 0; } }
 .steam-text { font-weight: bold; color: var(--tea-ink); text-shadow: 0 1px 2px rgba(255,255,255,0.5); }
 
-/* RWD */
 @media (max-width: 900px) {
     .game-layout-tea { flex-direction: column; padding: 1rem; height: auto; }
     .sidebar-tea { width: 100%; max-width: none; border-top: 4px solid #6f5641; border-left: 4px solid #6f5641; }

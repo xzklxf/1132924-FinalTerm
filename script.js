@@ -1,4 +1,4 @@
-/* AI 邏輯 (保持不變) */
+/* AI 邏輯控制器 (MCTS) */
 class GoAI {
     constructor(game, difficulty) {
         this.game = game;
@@ -6,7 +6,7 @@ class GoAI {
     }
     makeMove() {
         return new Promise(resolve => {
-            const thinkTime = 1200; // 思考時間稍長，配合悠閒步調
+            const thinkTime = 800; 
             setTimeout(() => {
                 let move;
                 try {
@@ -50,7 +50,6 @@ class GoAI {
         if (result.capturedCount > 0) score += result.capturedCount * 100;
         if (result.liberties === 1) score -= 50; 
         if (result.liberties > 1) score += 10;
-        // 9路中心權重
         if (x===4 && y===4) score += 15;
         if ((x===2||x===6)&&(y===2||y===6)) score += 5;
         score += Math.random() * 5;
@@ -58,7 +57,7 @@ class GoAI {
     }
 }
 
-/* 遊戲核心 */
+/* 遊戲核心邏輯 */
 class GoGame {
     constructor(canvasId, boardSize = 9, mode = 'pvp', difficulty = 'easy') {
         this.canvas = document.getElementById(canvasId);
@@ -79,6 +78,7 @@ class GoGame {
         this.passCounter = 0;
         this.isGameOver = false;
         this.isAiThinking = false;
+        this.isScoringPhase = false; 
 
         if (this.mode === 'cpu') {
             this.ai = new GoAI(this, difficulty);
@@ -93,8 +93,9 @@ class GoGame {
         window.addEventListener('resize', () => this.resize());
         
         const clickHandler = (e) => {
-            if (this.isGameOver || this.isAiThinking) return;
-            if (this.mode === 'cpu' && this.turn === 2) return;
+            if (this.isAiThinking) return;
+            if (this.isGameOver && !this.isScoringPhase) return; 
+            if (!this.isScoringPhase && this.mode === 'cpu' && this.turn === 2) return;
 
             const rect = this.canvas.getBoundingClientRect();
             const clientX = e.clientX || (e.touches && e.touches[0].clientX);
@@ -110,7 +111,6 @@ class GoGame {
 
     resize() {
         if (!this.boardContainer) return;
-        // 考慮竹蓆和木框的 padding，稍微減小
         const containerW = this.boardContainer.clientWidth;
         const containerH = this.boardContainer.clientHeight;
         const size = Math.floor(Math.min(containerW, containerH) - 40);
@@ -121,7 +121,6 @@ class GoGame {
         this.canvas.style.width = `${size}px`;
         this.canvas.style.height = `${size}px`;
         this.ctx.scale(dpr, dpr);
-        
         this.gridSize = (size - this.padding * 2) / (this.boardSize - 1);
         this.draw();
     }
@@ -136,10 +135,12 @@ class GoGame {
         this.passCounter = 0;
         this.isGameOver = false;
         this.isAiThinking = false;
+        this.isScoringPhase = false;
         
         document.getElementById('score-modal').style.display = 'none';
         document.getElementById('ai-thinking').style.display = 'none';
         document.getElementById('atari-warning').classList.remove('show');
+        document.getElementById('btn-finish-scoring').style.display = 'none';
         
         this.updateUI();
         this.resize();
@@ -148,18 +149,36 @@ class GoGame {
     handleInput(pixelX, pixelY) {
         const x = Math.round((pixelX - this.padding) / this.gridSize);
         const y = Math.round((pixelY - this.padding) / this.gridSize);
+
+        if (this.isScoringPhase) {
+            this.removeDeadGroup(x, y);
+            return;
+        }
         this.attemptMove(x, y);
+    }
+
+    removeDeadGroup(x, y) {
+        if (!this.isOnBoard(x, y)) return;
+        const color = this.board[y][x];
+        if (color === 0) return;
+
+        const group = this.getGroup(x, y, this.board);
+        group.stones.forEach(s => {
+            this.board[s.y][s.x] = 0;
+        });
+        const opponent = color === 1 ? 2 : 1;
+        this.captures[opponent] += group.stones.length;
+
+        this.draw();
+        this.updateUI();
     }
 
     async attemptMove(x, y) {
         if (!this.isOnBoard(x, y)) return;
-        
         if (this.isValidMove(x, y, this.turn)) {
             this.executeMove(x, y, this.turn);
             this.passCounter = 0; 
-            
             this.checkAtari();
-
             if (this.mode === 'cpu' && !this.isGameOver && this.turn === 2) {
                 await this.playAiTurn();
             }
@@ -170,9 +189,7 @@ class GoGame {
         if (this.isAiThinking) return;
         this.isAiThinking = true;
         document.getElementById('ai-thinking').style.display = 'flex';
-        
         const aiMove = await this.ai.makeMove();
-        
         document.getElementById('ai-thinking').style.display = 'none';
         this.isAiThinking = false;
 
@@ -205,7 +222,6 @@ class GoGame {
 
     passTurn() {
         if (this.isGameOver || this.isAiThinking) return;
-
         this.turn = this.turn === 1 ? 2 : 1;
         this.lastMove = null;
         this.koPosition = null;
@@ -213,19 +229,31 @@ class GoGame {
         this.updateUI();
 
         if (this.passCounter >= 2) {
-            this.endGame();
+            this.enterScoringPhase();
             return;
         }
-
         if(this.mode === 'cpu' && this.turn === 2) {
             this.playAiTurn();
         }
     }
 
+    enterScoringPhase() {
+        this.isScoringPhase = true;
+        document.getElementById('game-message').innerText = "請點擊死子移除";
+        document.getElementById('game-message').style.color = "#c77f67"; 
+        document.getElementById('btn-finish-scoring').style.display = 'flex';
+        alert("棋局暫停！\n請點擊棋盤上「對手的死子」將其移除。\n清理乾淨後，請按「✅ 死子已清，計算勝負」。");
+    }
+
+    finalizeScore() {
+        this.isScoringPhase = false;
+        document.getElementById('btn-finish-scoring').style.display = 'none';
+        this.endGame();
+    }
+
     endGame() {
         this.isGameOver = true;
         const score = this.calculateScore();
-        
         const modal = document.getElementById('score-modal');
         const details = document.getElementById('score-details');
         const winnerText = document.getElementById('winner-text');
@@ -237,15 +265,14 @@ class GoGame {
         const totalWhite = score.white + this.captures[2] + komi;
         let winner = totalBlack > totalWhite ? "黑棋勝" : "白棋勝";
 
-        // 茶系結算文案
         details.innerHTML = `
             <div style="margin-bottom: 15px; border-bottom: 1px dashed #8d6e53; padding-bottom: 10px;">
                 <span>🟤 黑方 (客)</span><br>
-                <span style="font-size: 0.9em">實地 ${score.black} + 提子 ${this.captures[1]} = <strong>${totalBlack} 目</strong></span>
+                <span style="font-size: 0.9em">盤面 ${score.black} + 提子 ${this.captures[1]} = <strong>${totalBlack} 目</strong></span>
             </div>
             <div>
                 <span>⚪ 白方 (茶友)</span><br>
-                <span style="font-size: 0.9em">實地 ${score.white} + 提子 ${this.captures[2]} + 貼目 ${komi} = <strong>${totalWhite} 目</strong></span>
+                <span style="font-size: 0.9em">盤面 ${score.white} + 提子 ${this.captures[2]} + 貼目 ${komi} = <strong>${totalWhite} 目</strong></span>
             </div>
         `;
         winnerText.innerText = winner;
@@ -393,8 +420,6 @@ class GoGame {
 
     draw() {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-        
-        // 繪製格線 (使用深茶色墨水感)
         this.ctx.beginPath();
         this.ctx.strokeStyle = '#5c4a3d'; 
         this.ctx.lineWidth = 1.2; 
@@ -405,22 +430,18 @@ class GoGame {
         }
         this.ctx.stroke();
         
-        // 繪製 9路星位 (天元)
         this.ctx.fillStyle = '#4a3b2b';
         const stars = [2, 6];
         const center = 4;
-        
         this.ctx.beginPath(); this.ctx.arc(this.padding + center*this.gridSize, this.padding + center*this.gridSize, 3.5, 0, Math.PI*2); this.ctx.fill();
         stars.forEach(x => stars.forEach(y => {
             this.ctx.beginPath(); this.ctx.arc(this.padding + x*this.gridSize, this.padding + y*this.gridSize, 3.5, 0, Math.PI*2); this.ctx.fill();
         }));
         
-        // 繪製棋子
         for(let y=0; y<this.boardSize; y++) for(let x=0; x<this.boardSize; x++) {
             if(this.board[y][x] !== 0) this.drawStone(x, y, this.board[y][x]);
         }
         
-        // 最新一手 (陶土紅標記)
         if(this.lastMove) {
             const cx = this.padding + this.lastMove.x * this.gridSize;
             const cy = this.padding + this.lastMove.y * this.gridSize;
@@ -436,11 +457,8 @@ class GoGame {
                 if (map[y][x] !== 0) {
                     const cx = this.padding + x * this.gridSize;
                     const cy = this.padding + y * this.gridSize;
-                    // 使用柔和的茶漬圓形標示地盤
                     this.ctx.fillStyle = map[y][x] === 1 ? 'rgba(74, 59, 43, 0.4)' : 'rgba(244, 237, 228, 0.5)';
                     this.ctx.beginPath();
-                    // this.ctx.arc(cx, cy, this.gridSize * 0.25, 0, Math.PI*2);
-                    // 改用方塊，像茶點
                     this.ctx.fillRect(cx - 6, cy - 6, 12, 12);
                     this.ctx.fill();
                 }
@@ -453,12 +471,8 @@ class GoGame {
         const cy = this.padding + y * this.gridSize;
         const r = this.gridSize * 0.45;
         this.ctx.beginPath();
-        
-        // 棋子投影 (更柔和溫暖)
         this.ctx.shadowColor = 'rgba(92, 74, 61, 0.5)'; this.ctx.shadowBlur = 4; this.ctx.shadowOffsetX = 2; this.ctx.shadowOffsetY = 2;
         this.ctx.arc(cx, cy, r, 0, Math.PI*2);
-        
-        // 擬真材質漸層 (黑曜石與羊脂玉)
         const grad = this.ctx.createRadialGradient(cx - r*0.3, cy - r*0.3, r*0.1, cx, cy, r);
         if(color === 1) { 
             grad.addColorStop(0, '#666'); grad.addColorStop(0.4, '#3a3a3a'); grad.addColorStop(1, '#1a1a1a'); 
@@ -469,11 +483,31 @@ class GoGame {
         this.ctx.shadowColor = 'transparent';
     }
 
+    // [修改] 更新 UI 時計算盤面子數
     updateUI() {
+        // 計算盤面黑白子
+        let blackCount = 0;
+        let whiteCount = 0;
+        for(let y=0; y<this.boardSize; y++) {
+            for(let x=0; x<this.boardSize; x++) {
+                if(this.board[y][x] === 1) blackCount++;
+                else if(this.board[y][x] === 2) whiteCount++;
+            }
+        }
+
+        // 更新 HTML 顯示
+        document.getElementById('black-board-count').innerText = blackCount;
+        document.getElementById('white-board-count').innerText = whiteCount;
         document.getElementById('black-captures').innerText = this.captures[1];
         document.getElementById('white-captures').innerText = this.captures[2];
-        const msg = this.turn === 1 ? "黑方落子 (請品茶)" : (this.mode === 'cpu' ? "茶友思考中..." : "白方落子");
-        
+
+        // 訊息狀態
+        let msg = "";
+        if (this.isScoringPhase) {
+            msg = "請點擊死子 (清理中)";
+        } else {
+            msg = this.turn === 1 ? "黑方落子 (請品茶)" : (this.mode === 'cpu' ? "茶友思考中..." : "白方落子");
+        }
         const badge = document.getElementById('game-message');
         badge.innerText = msg;
 
@@ -482,7 +516,7 @@ class GoGame {
     }
 
     undo() {
-        if (this.isGameOver || this.isAiThinking) return;
+        if (this.isGameOver || this.isAiThinking || this.isScoringPhase) return;
         if(this.history.length === 0) return;
         const steps = this.mode === 'cpu' ? 2 : 1;
         if (this.mode === 'cpu' && this.history.length < 2) return;
@@ -507,8 +541,6 @@ class GoGame {
             const ctx = new (window.AudioContext || window.webkitAudioContext)();
             const osc = ctx.createOscillator(); const gain = ctx.createGain();
             osc.connect(gain); gain.connect(ctx.destination);
-            
-            // 音效更溫潤低沉，像敲擊陶器或木頭
             if (color === 1) {
                 osc.type = 'sine'; osc.frequency.setValueAtTime(180, ctx.currentTime);
                 gain.gain.setValueAtTime(0.7, ctx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.12);
