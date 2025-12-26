@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>1132924 -FinalTerm </title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="bg-texture"></div>
+
+    <div id="start-modal" class="modal-overlay">
+        <div class="tea-panel modal-content">
+            <div class="panel-deco-top"></div>
+            <h1 class="tea-title">圍爐・弈棋</h1>
+            <p class="tea-subtitle">Final Term Project · 煮茶論道</p>
+            
+            <div class="mode-select-tea">
+                <button class="btn-tea btn-tea-lg" onclick="startGame('pvp')">
+                    <span class="icon">🍵</span> 雙人共品
+                </button>
+                <div class="tea-divider"><span>或 與茶友對弈</span></div>
+                <div class="btn-group-tea">
+                    <button class="btn-tea btn-tea-clay" onclick="startGame('cpu', 'easy')">初階茶友</button>
+                    <button class="btn-tea btn-tea-clay" onclick="startGame('cpu', 'hard')">高階茶友</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="score-modal" class="modal-overlay" style="display: none;">
+        <div class="tea-panel modal-content score-panel">
+            <h2 class="tea-title-sm">棋局已定，茶香正濃</h2>
+            <div id="score-details" class="score-box-tea">
+                </div>
+            <h1 id="winner-text" class="winner-text-tea"></h1>
+            <button class="btn-tea btn-tea-lg" onclick="location.reload()">再續一壺</button>
+        </div>
+    </div>
+
+    <div class="game-layout-tea" id="game-ui">
+        
+        <div id="atari-warning" class="atari-seal">
+            <span>⚠️ 叫吃 (Atari)</span>
+        </div>
+
+        <div class="board-section-tea" id="board-container">
+            <div class="bamboo-mat">
+                <div class="wood-board-frame">
+                    <canvas id="go-board"></canvas>
+                    <div id="ai-thinking" class="ai-steam-overlay" style="display: none;">
+                        <div class="tea-cup-loader">
+                            <div class="steam s1"></div>
+                            <div class="steam s2"></div>
+                            <div class="steam s3"></div>
+                            <div class="cup-body"></div>
+                        </div>
+                        <span class="steam-text">茶友思考中...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <aside class="sidebar-tea">
+            <div class="sidebar-header-tea">
+                <h3>品茗論棋</h3>
+                <span id="game-message" class="status-tea">準備沏茶</span>
+            </div>
+
+            <div class="players-tea-tray">
+                <div class="player-coaster" id="player-black">
+                    <div class="stone-tea black-stone"></div>
+                    <div class="info-tea">
+                        <span class="label-tea">執黑 (您)</span>
+                        <span class="score-tea">提子: <strong id="black-captures">0</strong></span>
+                    </div>
+                </div>
+
+                <div class="tea-vs-divider"></div>
+
+                <div class="player-coaster" id="player-white">
+                    <div class="stone-tea white-stone"></div>
+                    <div class="info-tea">
+                        <span class="label-tea" id="white-name">執白 (茶友 AI)</span>
+                        <span class="score-tea">提子: <strong id="white-captures">0</strong></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="controls-tea">
+                <button class="btn-bamboo" onclick="game.passTurn()">停一手 (品茶)</button>
+                <button class="btn-bamboo" onclick="game.undo()">悔棋 (回甘)</button>
+                <button class="btn-bamboo btn-reset-tea" onclick="location.reload()">重置棋局</button>
+            </div>
+        </aside>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        function startGame(mode, difficulty) {
+            // 這裡使用淡出動畫
+            const modal = document.getElementById('start-modal');
+            modal.style.opacity = '0';
+            setTimeout(() => {
+                modal.style.display = 'none';
+            }, 500); // 等待 CSS transition 結束
+            
+            if (window.game) window.game = null;
+            
+            // 強制 9路
+            setTimeout(() => {
+                window.game = new GoGame('go-board', 9, mode, difficulty);
+            }, 100);
+        }
+    </script>
+</body>
+</html>
